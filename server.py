@@ -27,7 +27,7 @@ ACCESS_TOKEN_URI = 'https://www.googleapis.com/oauth2/v4/token'
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid", "https://www.googleapis.com/auth/drive.file"],
-    redirect_uri="http://localhost:5000/callback"
+    redirect_uri="https://encryptify-five.vercel.app/callback"
 )
 
 
