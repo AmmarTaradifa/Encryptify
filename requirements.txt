@@ -27,14 +27,9 @@ google-auth-httplib2==0.1.0
 # Google API Client
 google-api-python-client==2.32.0
 
-# Requests
-requests==2.26.0
-
 # pathlib (included in Python standard library)
 pathlib2==2.3.6
 
 # cryptography
 cryptography==36.0.1
 
-# pip-vendor (included in Python standard library)
-pip-vendor==0.3.1
