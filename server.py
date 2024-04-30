@@ -140,44 +140,33 @@ def protected_area():
 def encrypt():
     if request.method == 'POST':
         uploaded_file = request.files['file']
-        filename = uploaded_file.filename
-
-         # Membuat direktori "Encriptify" jika belum ada
-        download_directory = os.path.join(os.path.expanduser('~'), 'Downloads/Encryptify')
-        if not os.path.exists(download_directory):
-            os.makedirs(download_directory)
-
-        file_path = os.path.join(download_directory, uploaded_file.filename)
-        uploaded_file.save(file_path)
+        filename = secure_filename(uploaded_file.filename)  # Mengamankan nama file
         
-        key = enkripsi.generate_key(file_path)
-        encrypted_file_path = file_path + '.encrypted'
-        key_path = file_path + '.key'
-
+        file_path = os.path.join(os.getcwd(), filename)  # Menentukan lokasi file
+        
+        # Menyimpan file langsung dari request ke Google Drive
         try:
+            key = enkripsi.generate_key(file_path)
+            encrypted_file_path = file_path + '.encrypted'
+            key_path = file_path + '.key'
+
             enkripsi.encrypt_file(file_path, key)  # Mencoba melakukan enkripsi
+
+            # Upload file terenkripsi ke Google Drive
+            file_paths = [encrypted_file_path, key_path]
+            googleDriveAPI.uploadFile(file_paths)
+
+            # Hapus file yang tidak diperlukan
+            os.remove(encrypted_file_path)
+            os.remove(key_path)
+
+            # Menyiapkan pesan alert
+            alert_message = f"File {filename} berhasil terenkripsi dan diunggah ke Google Drive!"
+            return f'<script>alert("{alert_message}"); window.location.replace("/main");</script>'
         except Exception as e:
-            # Jika enkripsi gagal, menampilkan pesan error dan menghapus file yang diunggah
-            os.remove(file_path)
-            error_message = f"Enkripsi gagal: {str(e)}"
+            # Jika terjadi kesalahan, tampilkan pesan error
+            error_message = f"Enkripsi dan unggah file gagal: {str(e)}"
             return f'<script>alert("{error_message}"); window.location.replace("/main");</script>'
-
-
-        # Upload encrypted file to Google Drive
-        file_paths = [encrypted_file_path, key_path]
-        googleDriveAPI.uploadFile(file_paths)
-        
-        os.remove(file_path)
-        os.remove(encrypted_file_path)
-        os.remove(key_path)
-
-
-        # Menyiapkan pesan alert
-        alert_message = f"File {filename} berhasil terenkripsi!"
-        
-        # Mengembalikan response dalam format JavaScript untuk menampilkan alert
-        return f'<script>alert("{alert_message}"); window.location.replace("/main");</script>'
-        
         
 @app.route('/decrypt', methods=['POST'])
 def decrypt():
