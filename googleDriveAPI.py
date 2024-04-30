@@ -4,11 +4,12 @@ import io
 import zipfile
 import time
 import flask
+import server
 from flask import Flask,render_template, session, abort, redirect, request, send_file, jsonify
 
 
 import googleapiclient.discovery
-from server import build_credentials
+
 from apiclient import discovery
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -20,7 +21,7 @@ from googleapiclient.http import MediaFileUpload
 app = flask.Blueprint('google_drive', __name__)
 
 def build_drive_api_v3():
-    credentials = build_credentials()
+    credentials = server.build_credentials()
     return googleapiclient.discovery.build('drive', 'v3', credentials=credentials).files()
 
 def check_folder_exists(drive_api, folder_name):
