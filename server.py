@@ -5,6 +5,7 @@ import enkripsi, dekripsi, googleDriveAPI
 import requests
 import flask
 import json
+import tempfile
 
 from flask import Flask,render_template, session, abort, redirect, request, send_file, jsonify
 from google.oauth2 import id_token
@@ -141,31 +142,34 @@ def protected_area():
 def encrypt():
     if request.method == 'POST':
         uploaded_file = request.files['file']
-        filename = secure_filename(uploaded_file.filename)  # Mengamankan nama file
+        filename = secure_filename(uploaded_file.filename)
         
-        file_path = os.path.join(os.getcwd(), filename)  # Menentukan lokasi file
-        
-        # Menyimpan file langsung dari request ke Google Drive
         try:
+            # Simpan file sementara
+            temp_dir = tempfile.mkdtemp()
+            file_path = os.path.join(temp_dir, filename)
+            uploaded_file.save(file_path)
+            
+            # Generate encryption key
             key = enkripsi.generate_key(file_path)
+            
+            # Encrypt file
+            enkripsi.encrypt_file(file_path, key)
+            
+            # Upload encrypted file to Google Drive
             encrypted_file_path = file_path + '.encrypted'
             key_path = file_path + '.key'
-
-            enkripsi.encrypt_file(file_path, key)  # Mencoba melakukan enkripsi
-
-            # Upload file terenkripsi ke Google Drive
             file_paths = [encrypted_file_path, key_path]
             googleDriveAPI.uploadFile(file_paths)
-
-            # Hapus file yang tidak diperlukan
+            
+            # Cleanup
             os.remove(encrypted_file_path)
             os.remove(key_path)
-
-            # Menyiapkan pesan alert
+            os.rmdir(temp_dir)
+            
             alert_message = f"File {filename} berhasil terenkripsi dan diunggah ke Google Drive!"
             return f'<script>alert("{alert_message}"); window.location.replace("/main");</script>'
         except Exception as e:
-            # Jika terjadi kesalahan, tampilkan pesan error
             error_message = f"Enkripsi dan unggah file gagal: {str(e)}"
             return f'<script>alert("{error_message}"); window.location.replace("/main");</script>'
         
