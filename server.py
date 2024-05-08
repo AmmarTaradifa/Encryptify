@@ -145,8 +145,8 @@ def encrypt():
         filename = secure_filename(uploaded_file.filename)
         
         try:
-            # Simpan file sementara
-            temp_dir = tempfile.mkdtemp()
+            # Simpan file sementara di direktori /tmp
+            temp_dir = tempfile.mkdtemp(dir='/tmp')
             file_path = os.path.join(temp_dir, filename)
             uploaded_file.save(file_path)
             
@@ -172,6 +172,7 @@ def encrypt():
         except Exception as e:
             error_message = f"Enkripsi dan unggah file gagal: {str(e)}"
             return f'<script>alert("{error_message}"); window.location.replace("/main");</script>'
+
         
 @app.route('/decrypt', methods=['POST'])
 def decrypt():
