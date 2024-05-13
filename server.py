@@ -146,7 +146,7 @@ def encrypt():
         
         try:
             # Simpan file sementara di direktori /tmp
-            file_path = os.path.join('/tmp', filename)
+            file_path = os.path.join(os.environ['TMPDIR'], filename)
             uploaded_file.save(file_path)
             
             # Generate encryption key
